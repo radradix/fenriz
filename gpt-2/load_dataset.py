@@ -6,6 +6,8 @@ import tqdm
 
 
 def load_dataset(enc, path, combine, encoding=None):
+    # Basically, append the paths of text files to a list called paths. 
+    # globs are wildcards -- *.txt -> a.txt, asdf.txt
     paths = []
     if os.path.isfile(path):
         # Simple file
@@ -24,6 +26,7 @@ def load_dataset(enc, path, combine, encoding=None):
     for path in tqdm.tqdm(paths):
         if path.endswith('.npz'):
             # Pre-encoded
+            # If the file (?) is already encoded, overwrite the output file with your newly encoded file.
             with np.load(path) as npz:
                 for item in npz.files:
                     token_chunks.append(npz[item])

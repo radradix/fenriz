@@ -24,6 +24,7 @@ def main():
     print('Reading files')
     chunks = load_dataset(enc, args.in_text, args.combine, encoding=args.encoding)
     print('Writing', args.out_npz)
+    # Save the tokens as numpy arrays, probably
     np.savez_compressed(args.out_npz, *chunks)
 
 

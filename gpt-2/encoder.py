@@ -107,10 +107,12 @@ class Encoder:
 
 def get_encoder(model_name):
     with open(os.path.join('models', model_name, 'encoder.json'), 'r') as f:
-        encoder = json.load(f)
+        encoder = json.load(f) # get encoder.json
     with open(os.path.join('models', model_name, 'vocab.bpe'), 'r', encoding="utf-8") as f:
-        bpe_data = f.read()
-    bpe_merges = [tuple(merge_str.split()) for merge_str in bpe_data.split('\n')[1:-1]]
+        bpe_data = f.read() # get vocab.bpe
+    # split vocab.bpe at the newlines, and ignore the first and last characters
+    bpe_merges = [tuple(merge_str.split()) for merge_str in bpe_data.split('\n')[1:-1]] 
+    # initialize the Encoder class with those variables set 
     return Encoder(
         encoder=encoder,
         bpe_merges=bpe_merges,

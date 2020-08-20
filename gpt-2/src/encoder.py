@@ -32,6 +32,7 @@ def get_pairs(word):
 
     Word is represented as tuple of symbols (symbols being variable-length strings).
     """
+    # Basically, get_pairs pairs every character pair there is, and then returns it. 
     pairs = set()
     prev_char = word[0]
     for char in word[1:]:
@@ -62,6 +63,10 @@ class Encoder:
             return token
 
         while True:
+            # The most frequent byte pair is given the lowest number and the least frequent is given the highest
+            # bigram denotes the most frequent character pairing in the whole lexicon of the dataset. 
+            # float('inf') means that if the pair is not found in bpe_ranks, then return infinity;
+            # because infinity can't be the minimum value, it is simply discarded. 
             bigram = min(pairs, key = lambda pair: self.bpe_ranks.get(pair, float('inf')))
             if bigram not in self.bpe_ranks:
                 break
@@ -70,6 +75,9 @@ class Encoder:
             i = 0
             while i < len(word):
                 try:
+                    # .index(String value, int startIndex)
+                    # Basically, word.index(first,i) is searching for the first instance of whatever "first" points to.
+                    # If the search fails, then a new word is added to the list. 
                     j = word.index(first, i)
                     new_word.extend(word[i:j])
                     i = j
@@ -77,12 +85,15 @@ class Encoder:
                     new_word.extend(word[i:])
                     break
 
+                # Pairs of words get added to new_word as well :)
                 if word[i] == first and i < len(word)-1 and word[i+1] == second:
                     new_word.append(first+second)
                     i += 2
                 else:
                     new_word.append(word[i])
                     i += 1
+            
+            # The loop will continue on until the length fo the word becomes 1 and word gets new_word assigned to it (?)
             new_word = tuple(new_word)
             word = new_word
             if len(word) == 1:
@@ -94,11 +105,17 @@ class Encoder:
         return word
 
     def encode(self, text):
+        # For every pattern in the text, return that pattern as a token.
+        # Encode that token in utf-8, and concatenate it into a single string called token.
+        # Extend the bpe tokens array to include byte pairs
+        # Basically, it's trying to split words like "they're" into "they" + "re" and so on
         bpe_tokens = []
         for token in re.findall(self.pat, text):
             token = ''.join(self.byte_encoder[b] for b in token.encode('utf-8'))
+            # bpe tokens are converted to numbers by self.encoder (in a separate json file).
             bpe_tokens.extend(self.encoder[bpe_token] for bpe_token in self.bpe(token).split(' '))
         return bpe_tokens
+        # ...It has something to do with ord()ing input so that gpt-2 magic can happen
 
     def decode(self, tokens):
         text = ''.join([self.decoder[token] for token in tokens])

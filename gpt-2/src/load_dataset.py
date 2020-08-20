@@ -37,9 +37,12 @@ def load_dataset(enc, path, combine, encoding=None):
                 raw_text = ''
             else:
                 raw_text += '<|endoftext|>'
+    
+    # The outputted tokens are turned into numpy arrays and appended to the tokens. 
     if raw_text:
         tokens = np.stack(enc.encode(raw_text))
         token_chunks.append(tokens)
+    # Once it's returned (to encode.py), it is saved. 
     return token_chunks
 
 
