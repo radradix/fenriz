@@ -10,9 +10,6 @@ let options = {
     mode: 'text',  
     pythonOptions: ['-u'],
 };  
-//var pyshell = new py.PythonShell('interactive_conditional_samples.py', options);
-
-var PythonShell = require('python-shell');
 var pyshell = new py.PythonShell('interactive_conditional_samples.py', options);
 
 bot.on('ready', () => {
@@ -34,16 +31,18 @@ bot.on("guildCreate", guild => {
 
 bot.on('message', async message => {
     var flag = true;
-
     // exit early if message is sent by a bot or if message doesn't start with "fn "
     if(message.author.bot || !message.content.startsWith(prefix)) return;
+
 
     var msg = message.content.substring(prefix.length)
     console.log(`\n\n${message.createdAt}\nMessage (${message.author.username}): ${msg}`);
     if(message.content.substring(prefix.length,prefix.length+2) === "-h")
         return message.channel.send("help message here")
     else {
-        // execute python script with arguments 
+        var pyshell = new py.PythonShell('interactive_conditional_samples.py', options);
+        console.log("New pyshell created.")
+
         py.PythonShell.run('interactive_conditional_samples.py', options, function (err, results) {
             console.log("py.PythonShell.run() in progress...")
             if (err){
@@ -62,12 +61,12 @@ bot.on('message', async message => {
 
         pyshell.stdout.on('data', function (data) {
             console.log("pyshell.stdout.on() in progress...")  
-            //if(flag){
+            if(flag){
                 console.log("Flag is: " + flag)
                 console.log("Response received from python: ")
                 console.log(data);
                 flag = false;
-                console.log("flag is false")
+                console.log("Flag is: " + flag)
                 if(data.substring(10).includes("<|endoftext|>")){
                     message.channel.send(data.substring(0,data.indexOf("<|endoftext|>")))
                     return;
@@ -75,16 +74,18 @@ bot.on('message', async message => {
                     message.channel.send(data.substring(0,2000));
                     return;
                 }
-            //} else return; // if flag is false, then just return
+            } else {
+                pyshell.exitSignal; // if flag is false, then just return
+                return;
+            }
         }); 
         
 
         /*pyshell.on('stderr', function (error) {  
             console.log("error: " + error);  
         });   */
-
-
-        pyshell.end(function (err) {
+          
+        pyshell.stdout.end(function (err) {
             if (err){
                 throw err;
             };

@@ -78,8 +78,7 @@ def interact_model(
                     for i in range(batch_size):
                         print(enc.decode(out[i]))
             except EOFError:
-                print("EOF error")
-                exit()
+                print("EOFError :/")
 
 
 if __name__ == '__main__':
