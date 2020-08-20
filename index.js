@@ -9,9 +9,11 @@ let options = {
     scriptPath: 'gpt-2/src',  
     mode: 'text',  
     pythonOptions: ['-u'],
-    flag: 'True'
 };  
-var pyshell = new py.PythonShell('interactive_conditional_samples.py', options);  
+//var pyshell = new py.PythonShell('interactive_conditional_samples.py', options);
+
+var PythonShell = require('python-shell');
+var pyshell = new py.PythonShell('interactive_conditional_samples.py', options);
 
 bot.on('ready', () => {
     console.log(`Logged in as ${bot.user.tag}!`); 
@@ -31,51 +33,64 @@ bot.on("guildCreate", guild => {
 });
 
 bot.on('message', async message => {
+    var flag = true;
+
     // exit early if message is sent by a bot or if message doesn't start with "fn "
     if(message.author.bot || !message.content.startsWith(prefix)) return;
 
-    console.log(`\n\n${message.createdAt}\nMessage (${message.author.username}): ${message.content}`);
+    var msg = message.content.substring(prefix.length)
+    console.log(`\n\n${message.createdAt}\nMessage (${message.author.username}): ${msg}`);
     if(message.content.substring(prefix.length,prefix.length+2) === "-h")
         return message.channel.send("help message here")
-    else{
-        //static run(scriptPath: string, options?: Options, callback?: (err?: PythonShellError, output?: any[]) => any): PythonShell;
-        pyshell = new py.PythonShell('interactive_conditional_samples.py', options);  
-        pyshell.send(message.content, function (err) { 
-            console.log("pyshell.send in progress...")
+    else {
+        // execute python script with arguments 
+        py.PythonShell.run('interactive_conditional_samples.py', options, function (err, results) {
+            console.log("py.PythonShell.run() in progress...")
+            if (err){
+                throw err;
+            }
+            console.log('Results: ' + results);
+        })
+
+
+        pyshell.send(msg, function (err) { 
+            console.log("pyshell.send() in progress...")
             if (err) console.log("There was an error in pyshell.send");
-            else{
-                console.log("Message sent to python; awaiting response...");
-            } 
+            else console.log("Message sent to python; awaiting response...");
         });
-        var flag = true;
-        if(flag){
-            console.log("flag is true")
-            pyshell.stdout.on('data', function (data) {  
+
+
+        pyshell.stdout.on('data', function (data) {
+            console.log("pyshell.stdout.on() in progress...")  
+            //if(flag){
+                console.log("Flag is: " + flag)
                 console.log("Response received from python: ")
                 console.log(data);
-                if(data.includes("<|endoftext|>")){
+                flag = false;
+                console.log("flag is false")
+                if(data.substring(10).includes("<|endoftext|>")){
                     message.channel.send(data.substring(0,data.indexOf("<|endoftext|>")))
+                    return;
                 } else {
                     message.channel.send(data.substring(0,2000));
+                    return;
                 }
-                flag = false;
-            }); 
-            
-            pyshell.on('stderr', function (error) {  
-                console.log("error: " + error);  
-            });   
-    
-            pyshell.end(function (err) {
-                if (err){
-                    throw err;
-                };
-                console.log('Finished responding to ' + message.author.username + ".\n");
-                pyshell.terminate();
-                return;
-            });
-        } // end if flag
+            //} else return; // if flag is false, then just return
+        }); 
+        
+
+        /*pyshell.on('stderr', function (error) {  
+            console.log("error: " + error);  
+        });   */
+
+
+        pyshell.end(function (err) {
+            if (err){
+                throw err;
+            };
+            console.log('Finished responding to ' + message.author.username + ".\n");
+        });
     }
-    console.log("END OF LOOP.")
     return;
 });
 

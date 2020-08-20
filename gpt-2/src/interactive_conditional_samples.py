@@ -68,7 +68,7 @@ def interact_model(
         ckpt = tf.train.latest_checkpoint(os.path.join('gpt-2/models', model_name))
         saver.restore(sess, ckpt)
 
-        while flag:
+        while True:
             try: 
                 context_tokens = enc.encode(input(''))
                 for _ in range(nsamples // batch_size): # range(0,1)
@@ -78,7 +78,8 @@ def interact_model(
                     for i in range(batch_size):
                         print(enc.decode(out[i]))
             except EOFError:
-                flag = False
+                print("EOF error")
+                exit()
 
 
 if __name__ == '__main__':
