@@ -16,7 +16,8 @@ def interact_model(
     length=None,
     temperature=1,
     top_k=0,
-    top_p=0.0
+    top_p=0.0,
+    flag=True
 ):
     """
     Interactively run the model
@@ -67,7 +68,6 @@ def interact_model(
         ckpt = tf.train.latest_checkpoint(os.path.join('gpt-2/models', model_name))
         saver.restore(sess, ckpt)
 
-        flag = True
         while flag:
             try: 
                 context_tokens = enc.encode(input(''))
