@@ -67,14 +67,19 @@ def interact_model(
         ckpt = tf.train.latest_checkpoint(os.path.join('gpt-2/models', model_name))
         saver.restore(sess, ckpt)
 
-        while True:
-            context_tokens = enc.encode(input())
-            for _ in range(nsamples // batch_size):
-                out = sess.run(output, feed_dict={
-                    context: [context_tokens for _ in range(batch_size)]
-                })[:, len(context_tokens):]
-                for i in range(batch_size):
-                    print(enc.decode(out[i]))
+        flag = True
+        while flag:
+            try: 
+                context_tokens = enc.encode(input(''))
+                for _ in range(nsamples // batch_size): # range(0,1)
+                    out = sess.run(output, feed_dict={
+                        context: [context_tokens for _ in range(batch_size)]
+                    })[:, len(context_tokens):]
+                    for i in range(batch_size):
+                        print(enc.decode(out[i]))
+            except EOFError:
+                flag = False
+
 
 if __name__ == '__main__':
     fire.Fire(interact_model)
