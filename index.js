@@ -10,11 +10,10 @@ let options = {
     mode: 'text',  
     pythonOptions: ['-u'],
 };  
-var pyshell = new py.PythonShell('interactive_conditional_samples.py', options);
 
 bot.on('ready', () => {
     console.log(`Logged in as ${bot.user.tag}!`); 
-    console.log("Now in " + bot.guilds.cache.size + " guilds :D");
+    console.log(`Now in ${bot.guilds.cache.size} guilds :D`);
 });
 
 bot.on('disconnect', () => {
@@ -34,7 +33,6 @@ bot.on('message', async message => {
     // exit early if message is sent by a bot or if message doesn't start with "fn "
     if(message.author.bot || !message.content.startsWith(prefix)) return;
 
-
     var msg = message.content.substring(prefix.length)
     console.log(`\n\n${message.createdAt}\nMessage (${message.author.username}): ${msg}`);
     if(message.content.substring(prefix.length,prefix.length+2) === "-h")
@@ -43,53 +41,37 @@ bot.on('message', async message => {
         var pyshell = new py.PythonShell('interactive_conditional_samples.py', options);
         console.log("New pyshell created.")
 
-        py.PythonShell.run('interactive_conditional_samples.py', options, function (err, results) {
-            console.log("py.PythonShell.run() in progress...")
-            if (err){
-                throw err;
-            }
-            console.log('Results: ' + results);
-        })
-
-
         pyshell.send(msg, function (err) { 
             console.log("pyshell.send() in progress...")
             if (err) console.log("There was an error in pyshell.send");
             else console.log("Message sent to python; awaiting response...");
         });
-
-
+        
         pyshell.stdout.on('data', function (data) {
             console.log("pyshell.stdout.on() in progress...")  
             if(flag){
-                console.log("Flag is: " + flag)
+                //console.log(`Flag is: ${flag}`)
                 console.log("Response received from python: ")
                 console.log(data);
                 flag = false;
-                console.log("Flag is: " + flag)
+                //console.log(`Flag is: ${flag}`)
                 if(data.substring(10).includes("<|endoftext|>")){
                     message.channel.send(data.substring(0,data.indexOf("<|endoftext|>")))
+                    console.log(`Finished responding to ${message.author.username}.\n`);
                     return;
                 } else {
                     message.channel.send(data.substring(0,2000));
+                    console.log(`Finished responding to ${message.author.username}.\n`);
                     return;
                 }
-            } else {
-                pyshell.exitSignal; // if flag is false, then just return
-                return;
-            }
+            } 
         }); 
-        
-
-        /*pyshell.on('stderr', function (error) {  
-            console.log("error: " + error);  
-        });   */
           
         pyshell.stdout.end(function (err) {
             if (err){
                 throw err;
             };
-            console.log('Finished responding to ' + message.author.username + ".\n");
+            console.log(`pyshell.stdout.end called!!`);
         });
     }
     return;
