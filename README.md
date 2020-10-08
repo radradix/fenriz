@@ -2,7 +2,7 @@
 Fenriz is a Discord bot that incorporates GPT-2 to complete user input. 
 
 ## General info
-I applied my admittedly shoddy knowledge of Python to the development of Fenriz. I wanted to learn how to use both Python and GPT-2 in my own self-directed environment, and I think I've gotten there. I'd like to hope so.
+I applied my admittedly shoddy knowledge of Python to the development of Fenriz. I wanted to learn how to use both Python and GPT-2 in my own self-directed environment. I want to understand still more. 
 
 To talk to Fenriz, format your input like `fn hello`. 
 
@@ -10,6 +10,7 @@ To talk to Fenriz, format your input like `fn hello`.
 This project was created using the following: 
 * GPT-2 (an open-source language model)
 * Python
+* Javascript
 * [Discord API](https://discord.com/developers/docs/intro)
 * Nodemon
 
